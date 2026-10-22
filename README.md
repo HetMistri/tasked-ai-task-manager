@@ -200,7 +200,8 @@ AI service:
 - `POST /ai/actions/{confirmation_id}/confirm`
 - `GET /ai/health`
 
-Full examples are in [`docs/api.md`](docs/api.md).
+Interactive API documentation is available from the running Core Task API at
+<http://localhost:8000/docs>.
 
 ## Tests
 
@@ -227,7 +228,7 @@ no API key or network access is required.
 8. Restart the stack and show that tasks persist.
 9. Stop the AI service and show that manual CRUD still works.
 
-More detail: [`docs/demo.md`](docs/demo.md).
+Run `scripts/smoke-test.sh` for a scripted version of this flow.
 
 ## Repository layout
 
@@ -235,7 +236,6 @@ More detail: [`docs/demo.md`](docs/demo.md).
 task-service/   Core Task API (FastAPI, SQLAlchemy, Alembic, JWT)
 ai-service/     AI service (FastAPI, google-genai, Gemini function calling)
 client/         React + TypeScript frontend, served by nginx
-docs/           Architecture, API and demo notes
 scripts/        Smoke-test helper
 compose.yaml    Full stack
 .env.example    Environment template

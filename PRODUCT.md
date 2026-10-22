@@ -10,7 +10,7 @@
 **Deployment:** Docker and Docker Compose  
 **Primary Goal:** Build an intelligent task manager that converts natural-language instructions into secure, validated task operations.
 
-> **Implementation note:** The MVP keeps authentication, task rules and activity history inside the Core Task API instead of splitting them into extra services. See the repository README and `docs/architecture.md` for the deployed architecture.
+> **Implementation note:** The MVP keeps authentication, task rules and activity history inside the Core Task API instead of splitting them into extra services. See the repository README for the deployed architecture.
 
 ---
 

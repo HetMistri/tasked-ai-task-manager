@@ -67,6 +67,9 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# Local documentation
+docs/
+
 # Local development
 local/
 tmp/

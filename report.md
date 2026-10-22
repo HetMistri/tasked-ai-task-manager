@@ -6,8 +6,9 @@ Gemini API while keeping the existing four-service architecture and safety
 behaviour.
 **Status:** MVP complete and verified in mock and live Gemini modes.
 
-No GitHub remote is configured and nothing was published. The repository
-contains no committed provider key.
+The repository is published publicly at
+<https://github.com/HetMistri/tasked-ai-task-manager>. It contains no committed
+provider key.
 
 ---
 
@@ -127,8 +128,6 @@ application code, Compose files, or current documentation.
 
 - `ai-service/app/clients/gemini.py` — real Gemini client, deterministic mock
   client, safe provider error mapping.
-- `docs/architecture.md`, `docs/api.md`, `docs/demo.md` — current architecture,
-  API contracts, and demo script.
 - `scripts/smoke-test.sh` — end-to-end manual CRUD + AI + confirmation flow.
 - `report.md` — this report.
 
@@ -136,6 +135,9 @@ application code, Compose files, or current documentation.
 
 - `ai-service/app/clients/bedrock.py`
 - `compose.aws.yaml`
+- `docs/` — repository documentation was removed and Git-ignored at the
+  maintainer's request after verification. Architecture, API and demo guidance
+  is retained in `README.md` and this report.
 
 ### Updated
 
@@ -158,7 +160,7 @@ application code, Compose files, or current documentation.
   `client/src/App.css` — Gemini health shape and live/mock badge.
 - `client/nginx.conf` — runtime DNS resolution, `/ai/` 120-second proxy timeout,
   correct healthcheck host.
-- `README.md`, `PRODUCT.md`, architecture/API/demo docs.
+- `README.md`, `PRODUCT.md`.
 
 ### Transaction fix
 
@@ -302,21 +304,20 @@ call Gemini.
 ### Security checks
 
 - `.env` is ignored by Git (`git check-ignore` confirms).
-- No key-like pattern was found in tracked files or Git history.
+- The public repository was scanned before push; no key-like pattern was found
+  in tracked files or Git history.
 - The AI image contains no provider environment values and no `.env` file.
 - Database credentials are local-development defaults; they are not production
   secrets.
 - The frontend receives no Gemini key and never calls Google directly.
-- No GitHub remote is configured; no push was performed.
 
 ### Important key-rotation warning
 
 During migration, a live Gemini key was accidentally present in
 `compose.yaml` and `.env.example`. It has been removed from both files and moved
-to the ignored `.env`. The repository has no remote and the key was never found
-in tracked history, but the key did appear in local tool output and files.
-**Rotate that key in Google AI Studio** and update the local `.env` before any
-future demo or publication.
+to the ignored `.env`. The key was never committed to Git, but it did appear in
+local tool output and files. **Rotate that key in Google AI Studio** and update
+the local `.env` before any future demo.
 
 ---
 
@@ -341,9 +342,10 @@ future demo or publication.
 
 ## 8. Git state
 
-- Repository: local Git repository with an initial commit plus the migration
-  changes and this report committed locally.
-- Remote: none.
-- Published: no.
+- Public GitHub repository:
+  <https://github.com/HetMistri/tasked-ai-task-manager>
+- Branch: `main`, tracking `origin/main`.
+- Published: yes.
 - Provider key committed: no.
 - `.env` remains untracked and ignored.
+- The `docs/` directory was removed and Git-ignored at the maintainer's request.

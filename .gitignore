@@ -47,7 +47,7 @@ yarn-error.log*
 .DS_Store
 
 # Docker
-.dockerignore
+# Keep .dockerignore files tracked so clean clones build safely.
 
 # Logs
 *.log

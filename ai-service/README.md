@@ -85,7 +85,7 @@ uvicorn app.main:app --reload --port 8001
 The Core Task API must be reachable for task actions. If it is not, `/ai/chat`
 returns a controlled error; manual task management is unaffected.
 
-## Safety rules implemented here
+## Verification status\n\n- Automated tests mock Gemini and the Core Task API; no key or network needed.\n- Live function calling was verified manually on 2026-10-22 with\n  `gemini-3.5-flash-lite`: task creation, search, completion and the\n  delete-confirmation flow all succeeded through the Core Task API.\n- One transient Gemini `504` was retried successfully. The service retries once\n  with a bounded timeout, and the frontend proxy allows 120 seconds.\n- Model availability is account-specific. The configured model was present in\n  `client.models.list()` for the verification key, but this is not a guarantee\n  for every key or region.\n\n## Safety rules implemented here
 
 - Gemini may only call the ten declarations in `app/services/tools.py`; the
   backend rejects unknown names.

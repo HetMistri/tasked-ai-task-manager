@@ -150,6 +150,10 @@ Delete response:
 `is_mock` is `true` whenever the service is using the deterministic mock
 provider. The UI shows this explicitly.
 
+Transient provider failures are retried once with a bounded timeout. The
+frontend nginx proxy waits up to 120 seconds for `/ai/` responses, which covers
+the provider timeout plus one retry.
+
 ### Confirm or cancel
 
 `POST /ai/actions/{confirmation_id}/confirm`

@@ -83,8 +83,16 @@ PostgreSQL is the only source of truth. Tasks are soft-deletable and always
 scoped by `user_id`, which comes from the verified JWT. Activity records are
 written by the Core Task API alongside task changes.
 
+Each mutating service method commits before the response is returned. Relying
+only on FastAPI's yield-dependency cleanup would commit after the response and
+let a client read stale data immediately (for example, a token issued before the
+user row was committed).
+
 The AI service may only see task data returned by the Core Task API after an
 authenticated request, and only the fields needed for the response.
+
+Live Gemini function calling was verified on 2026-10-22 with
+`gemini-3.5-flash-lite`; automated tests still use a fake provider.
 
 ## Configuration
 

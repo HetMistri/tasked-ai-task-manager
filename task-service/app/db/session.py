@@ -25,9 +25,10 @@ async_session_maker = async_sessionmaker(
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency that provides a database session per request.
 
-    Changes are committed when the request handler returns successfully and
-    rolled back if it raises. The task service and the activity log written by
-    the same request therefore succeed or fail together.
+    Service methods commit their own writes before returning a response, so a
+    client can immediately read what it just created. This dependency's commit
+    is a safety net; FastAPI runs the cleanup after the response has been sent,
+    so writes must not rely on it alone.
     """
     async with async_session_maker() as session:
         try:

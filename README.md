@@ -249,8 +249,13 @@ compose.yaml    Full stack
 - Activity history is not yet displayed in the frontend.
 - Mock mode uses simple keyword heuristics; it demonstrates the flow and safety
   checks, not a real language model.
-- Live Gemini behaviour depends on the key, quota and model availability. Mock
-  tests do not prove a live provider call.
+- Live Gemini function calling was verified on 2026-10-22 against
+  `gemini-3.5-flash-lite` (create, complete and delete-confirmation flows).
+  Availability, quota and model access still depend on the API key and account.
+  The AI service retries one transient provider failure; the frontend proxy
+  allows up to 120 seconds for an AI response.
+- Automated tests mock Gemini and do not call the provider. The live check was a
+  separate manual verification.
 
 ## Security notes
 

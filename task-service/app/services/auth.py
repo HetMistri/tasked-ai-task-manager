@@ -66,6 +66,9 @@ class AuthService:
         )
         self.session.add(user)
         await self.session.flush()
+        # Commit before returning the token so the client can immediately use it.
+        # FastAPI runs yield-dependency cleanup (get_db commit) after the response.
+        await self.session.commit()
         return user
 
     async def login(self, credentials: UserLogin) -> Token:

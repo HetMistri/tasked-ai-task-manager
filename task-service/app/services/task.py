@@ -39,6 +39,8 @@ class TaskService:
             source=source,
             after_state={"title": task.title, "priority": task.priority.value},
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return task
 
@@ -141,6 +143,8 @@ class TaskService:
             before_state=before_state,
             after_state=after_state,
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return task
 
@@ -162,6 +166,8 @@ class TaskService:
             before_state=before_state,
             after_state={"status": task.status.value, "completed_at": task.completed_at.isoformat() if task.completed_at else None},
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return task
 
@@ -183,6 +189,8 @@ class TaskService:
             before_state=before_state,
             after_state={"status": task.status.value, "completed_at": None},
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return task
 
@@ -204,6 +212,8 @@ class TaskService:
             before_state=before_state,
             after_state={"priority": task.priority.value},
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return task
 
@@ -225,6 +235,8 @@ class TaskService:
             before_state=before_state,
             after_state={"is_archived": task.is_archived, "archived_at": task.archived_at.isoformat() if task.archived_at else None},
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return task
 
@@ -246,6 +258,8 @@ class TaskService:
             before_state=before_state,
             after_state={"is_archived": task.is_archived, "archived_at": None},
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return task
 
@@ -267,6 +281,8 @@ class TaskService:
             before_state=before_state,
             after_state={"deleted_at": task.deleted_at.isoformat() if task.deleted_at else None},
         )
+        # Commit before responding; dependency cleanup runs after the response.
+        await self.session.commit()
 
         return True
 

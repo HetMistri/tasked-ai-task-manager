@@ -92,6 +92,10 @@ curl -s http://localhost:8001/ai/health
 The panel should now show **Gemini** instead of **Mock Mode**. Perform one
 create and one delete-confirmation flow to demonstrate live function calling.
 
+This exact live path was verified on 2026-10-22 with `gemini-3.5-flash-lite`:
+create, complete, delete confirmation, and persistence through the Core Task
+API.
+
 If no key is available, say clearly that the demo is running in mock mode. Do
 not present mock output as a live model response.
 

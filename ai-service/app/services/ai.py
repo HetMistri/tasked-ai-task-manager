@@ -14,7 +14,7 @@ from app.clients.gemini import ProviderError, ai_client
 from app.clients.task_api import task_api_client
 from app.core.config import settings
 from app.schemas.tools import TOOL_INPUT_SCHEMAS
-from app.services.tools import TOOLS, TOOL_HANDLERS
+from app.services.tools import TOOL_HANDLERS, TOOLS
 
 logger = logging.getLogger(__name__)
 
@@ -108,20 +108,41 @@ class AIService:
 
             for call in response.function_calls:
                 if call.name == "delete_task":
+                    # Validate before asking the user to confirm anything.
+                    try:
+                        validated = TOOL_INPUT_SCHEMAS["delete_task"].model_validate(
+                            call.arguments
+                        )
+                    except ValidationError as exc:
+                        function_response_parts.append(
+                            types.Part.from_function_response(
+                                name=call.name,
+                                response={
+                                    "result": {
+                                        "error": "Invalid arguments for delete_task.",
+                                        "details": exc.errors(include_url=False),
+                                        "success": False,
+                                    }
+                                },
+                            )
+                        )
+                        continue
+
+                    data = validated.model_dump(exclude_none=True, mode="json")
                     confirmation = self._create_confirmation(
-                        call.name, call.arguments, auth_token
+                        call.name, data, auth_token
                     )
                     return {
                         "response": (
                             "Please confirm: delete the task matching "
-                            f"'{call.arguments.get('task_identifier')}'. "
+                            f"'{data['task_identifier']}'. "
                             "This action cannot be undone."
                         ),
                         "requires_confirmation": True,
                         "confirmation_id": confirmation,
                         "confirmation_details": {
                             "action": call.name,
-                            "task_identifier": call.arguments.get("task_identifier"),
+                            "task_identifier": data["task_identifier"],
                         },
                         "is_mock": settings.use_mock,
                     }
@@ -249,6 +270,22 @@ class AIService:
         self, identifier: str, auth_token: str
     ) -> tuple[Optional[dict], Optional[dict]]:
         """Find exactly one task. Returns (task, error_result)."""
+        # The model sometimes passes an ID it saw in an earlier tool result.
+        try:
+            task_id = UUID(identifier)
+        except ValueError:
+            pass
+        else:
+            try:
+                return await task_api_client.get_task(auth_token, task_id), None
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code != 404:
+                    raise
+                return None, {
+                    "error": f"No task found matching '{identifier}'.",
+                    "success": False,
+                }
+
         result = await task_api_client.get_tasks(
             auth_token, search=identifier, page_size=5
         )

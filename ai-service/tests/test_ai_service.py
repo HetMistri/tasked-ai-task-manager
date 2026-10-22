@@ -61,6 +61,12 @@ class FakeTaskAPI:
     async def get_tasks(self, token, search=None, page_size=20, **kwargs):
         return {"tasks": self.tasks, "total": len(self.tasks)}
 
+    async def get_task(self, token, task_id):
+        for task in self.tasks:
+            if task["id"] == str(task_id):
+                return task
+        raise AssertionError("unexpected direct lookup")
+
     async def create_task(self, token, **kwargs):
         self.created.append(kwargs)
         return {"id": "11111111-1111-1111-1111-111111111111", **kwargs}
@@ -132,6 +138,18 @@ async def test_single_match_is_completed(monkeypatch, service):
     assert result["status"] == "completed"
 
 
+async def test_uuid_identifier_uses_direct_lookup(monkeypatch, service):
+    task_uuid = "b11e9238-dc7c-43ea-9735-ac35d8c64315"
+    fake_api = FakeTaskAPI(tasks=[{"id": task_uuid, "title": "DBMS assignment"}])
+    monkeypatch.setattr(ai_module, "task_api_client", fake_api)
+
+    result = await service._execute_tool(
+        "complete_task", {"task_identifier": task_uuid}, "token"
+    )
+
+    assert result["status"] == "completed"
+
+
 async def test_delete_requires_confirmation_before_execution(monkeypatch, service):
     fake_api = FakeTaskAPI(tasks=[{"id": "42", "title": "Old task"}])
     fake_gemini = FakeGemini(
@@ -145,6 +163,24 @@ async def test_delete_requires_confirmation_before_execution(monkeypatch, servic
     assert result["requires_confirmation"] is True
     assert result["confirmation_id"]
     # Nothing was deleted yet.
+    assert fake_api.deleted == []
+
+
+async def test_invalid_delete_arguments_do_not_create_confirmation(monkeypatch, service):
+    fake_api = FakeTaskAPI(tasks=[{"id": "42", "title": "Old task"}])
+    fake_gemini = FakeGemini(
+        [
+            tool_call_response("delete_task", {}),
+            text_response("Which task should I delete?"),
+        ]
+    )
+    monkeypatch.setattr(ai_module, "task_api_client", fake_api)
+    monkeypatch.setattr(ai_module, "ai_client", fake_gemini)
+
+    result = await service.process_message("delete it", "token-a")
+
+    assert result["requires_confirmation"] is False
+    assert result["response"] == "Which task should I delete?"
     assert fake_api.deleted == []
 
 

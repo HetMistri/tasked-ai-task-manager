@@ -35,8 +35,9 @@ never calls the AI service.
   call is validated and executed by our backend.
 - Ten functions: create, search, update, complete, reopen, set priority,
   archive, restore, delete, and summary.
-- Delete and broad/destructive actions require a user-scoped, short-lived,
-  single-use confirmation.
+- Delete requires a user-scoped, short-lived, single-use confirmation. No
+  broad/bulk mutation tool is exposed, so no operation can silently change an
+  unbounded set of tasks.
 - Ambiguous or missing task matches return a clarification response instead of
   guessing.
 - Tool-loop limit: four iterations per user message.

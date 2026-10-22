@@ -1,0 +1,95 @@
+name: tasked
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tasked-postgres
+    environment:
+      POSTGRES_USER: tasked
+      POSTGRES_PASSWORD: tasked
+      POSTGRES_DB: tasked
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tasked -d tasked"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - tasked-network
+
+  task-service:
+    build:
+      context: ./task-service
+      dockerfile: Dockerfile
+    container_name: tasked-task-service
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://tasked:tasked@postgres:5432/tasked
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+      FRONTEND_ORIGIN: http://localhost:5173
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # /ready checks PostgreSQL; migrations have run before Uvicorn starts.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - tasked-network
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: tasked-ai-service
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: INFO
+      GEMINI_ENABLED: ${GEMINI_ENABLED:-false}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-30}
+      TASK_API_URL: http://task-service:8000
+      TASK_API_TIMEOUT: 10.0
+    ports:
+      - "8001:8001"
+    depends_on:
+      task-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/ai/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - tasked-network
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: tasked-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      task-service:
+        condition: service_healthy
+    networks:
+      - tasked-network
+
+volumes:
+  postgres_data:
+
+networks:
+  tasked-network:
+    driver: bridge
